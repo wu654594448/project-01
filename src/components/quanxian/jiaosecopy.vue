@@ -9,7 +9,7 @@
     <el-card>
       <el-row>
         <el-col>
-          <el-button type="primary" @click="tianjia">添加角色</el-button>
+          <el-button type="primary">添加角色</el-button>
         </el-col>
       </el-row>
       <!-- 角色列表 -->
@@ -45,7 +45,7 @@
           <template slot-scope="scope">
             <el-button size="mini" type="primary" icon="el-icon-edit" @click="editwin(scope.row.id)">编辑</el-button>
             <el-button size="mini" type="danger" icon="el-icon-delete">删除</el-button>
-            <el-button size="mini" type="warning" icon="el-icon-setting" @click="showSetRightDialog(scope.row)">分配权限</el-button>
+            <el-button size="mini" type="warning" icon="el-icon-setting" @click="showSetRightDialog">分配权限</el-button>
           </template>
         </el-table-column>
       </el-table>
@@ -53,7 +53,7 @@
     <!-- 编辑对话框 -->
     <el-dialog
     title="修改用户信息"
-    :visible.sync="bianjiyin"
+    :visible.sync="edityin"
     width="50%"
     @close="handleClose">
       <!-- 内容主体区域 -->
@@ -69,31 +69,16 @@
       </el-form>
       <!-- 底部区域 -->
       <span slot="footer" class="dialog-footer">
-        <el-button @click="bianjiyin = false">取 消</el-button>
+        <el-button @click="edityin = false">取 消</el-button>
         <el-button type="primary" @click="editying">确 定</el-button>
       </span>
     </el-dialog>
     <!-- 分配权限对话框 -->
     <el-dialog title="分配权限" width="50%" :visible.sync="edityin" @close="setRightDialogClosed">
-      <el-tree :data="rightslist" :props="treeProps" show-checkbox node-key="id" default-expand-all :default-checked-keys="defKeys" ref="treeRef"></el-tree>
-      <span slot="footer" class="dialog-footer">
-        <el-button @click="edityin = false">取消</el-button>
-        <el-button type="primary" @click="allotRights">确定</el-button>
-      </span>
-    </el-dialog>
-    <!-- 添加角色对话框 -->
-    <el-dialog title="添加角色" width="50%" :visible.sync="addyin" @close="addRightDialogClosed">
-      <el-form>
-        <el-form-item label="角色名称" prop="roleName">
-          <el-input></el-input>
-        </el-form-item>
-        <el-form-item label="角色描述" prop="roleDesc">
-          <el-input></el-input>
-        </el-form-item>
-      </el-form>
-      <span slot="footer" class="dialog-footer">
-        <el-button @click="addyin = false">取 消</el-button>
-        <el-button type="primary" @click="addguan">确 定</el-button>
+      <el-tree :data="rightslist" :props="treeProps" show-checkbox node-key="id" default-expand-all :default-expanded-keys="defKeys" ref="treeRef"></el-tree>
+      <span slot="tooter" class="dialog-footer">
+        <el-button @click="edityin = false"></el-button>
+        <el-button type="primary" @click="allotRights"></el-button>
       </span>
     </el-dialog>
   </div>
@@ -107,8 +92,6 @@ export default {
       editForm: { roleName: '', roleDesc: '' },
       // 对话框的隐藏
       edityin: false,
-      addyin: false,
-      bianjiyin: false,
       // 所有角色列表数据
       ROLElist: [],
       // 权限的数据
@@ -143,7 +126,6 @@ export default {
     //   }
     //   this.ROLElist = res.data
     },
-    // 下拉的删除
     async removeRightById(role, rightsId) {
       const confirmResult = await this.$confirm('此操作将永久删除该文件, 是否继续?', '提示', {
         confirmButtonText: '确定',
@@ -160,17 +142,16 @@ export default {
       }
       role.children = res.data
     },
-    // 点击编辑按钮
     async editwin(id) {
-      // console.log(id)
+      console.log(id)
       const { data: res } = await this.$http.get(`roles/${id}`)
-      console.log(res.data)
+      // console.log(res)
       if (res.meta.status !== 200) {
         return this.$message.error('根据id查询角色失败')
       }
       // console.log(res.data)
       this.editForm = res.data
-      this.bianjiyin = true
+      this.edityin = true
     },
     // 编辑更改后，点击确定的函数
     editying() {
@@ -188,10 +169,11 @@ export default {
           this.$message.error('编辑失败')
         }
         this.$message.success('编辑成功')
-        this.bianjiyin = false
+        this.edityin = false
         this.getROLElist()
       })
     },
+    // 显示分配权限的界面
     async showSetRightDialog(role) {
       this.roleId = role.id
       const { data: res } = await this.$http.get('rights/tree')
@@ -225,15 +207,7 @@ export default {
       this.$message.success('分配权限成功')
       this.getROLElist()
       this.edityin = false
-    },
-    // 添加对话框
-    tianjia() {
-      this.addyin = true
-    },
-    // 监听添加对话框关闭
-    addRightDialogClosed() {},
-    // 添加对话框确定按钮关闭
-    addguan() {}
+    }
   }
 }
 </script>
